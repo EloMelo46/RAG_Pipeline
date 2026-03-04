@@ -4,7 +4,7 @@ from __future__ import annotations
 Agentic retrieval — the LLM can decide to search multiple times.
 
 Loop:
-  1. Rewrite query → multi-query → vector search
+  1. Multi-query generation → vector search
   2. LLM reviews results → decides if more info is needed
   3. If yes → generates new query → repeats
   4. Final reranking over all accumulated candidates
@@ -13,12 +13,11 @@ Loop:
 from llama_index.core import VectorStoreIndex
 from llama_index.core.schema import NodeWithScore
 
-from retrieval.query_rewriter import rewrite_query
 from retrieval.multi_query import generate_multi_queries
 from retrieval.retriever import retrieve_candidates
 from retrieval.reranker import rerank
 
-from config import FINAL_K, MAX_AGENT_STEPS
+from config import FINAL_K, MAX_AGENT_STEPS, MULTI_QUERY_VARIANTS
 
 
 def agentic_retrieve(
@@ -37,20 +36,20 @@ def agentic_retrieve(
     for step in range(MAX_AGENT_STEPS):
         step_label = f"  [Agent step {step + 1}/{MAX_AGENT_STEPS}]"
 
-        # 1. Rewrite query
-        rewritten = rewrite_query(llm, current_query)
-        print(f"{step_label} Rewritten query: {rewritten[:80]}...")
+        # 1. Build query list
+        if MULTI_QUERY_VARIANTS > 1:
+            queries = generate_multi_queries(llm, current_query, num_variants=MULTI_QUERY_VARIANTS)
+            print(f"{step_label} Searching with {len(queries)} query variants...")
+        else:
+            queries = [current_query]
+            print(f"{step_label} Searching with 1 query (multi-query disabled)...")
 
-        # 2. Generate multi-queries
-        queries = generate_multi_queries(llm, rewritten)
-        print(f"{step_label} Searching with {len(queries)} query variants...")
-
-        # 3. Retrieve candidates
+        # 2. Retrieve candidates
         candidates = retrieve_candidates(index, queries)
         all_candidates.extend(candidates)
         print(f"{step_label} Found {len(candidates)} candidates (total: {len(all_candidates)})")
 
-        # 4. Ask LLM if more search is needed
+        # 3. Ask LLM if more search is needed
         preview = "\n---\n".join([c.text[:200] for c in candidates[:5]])
 
         reasoning_prompt = (
