@@ -10,7 +10,7 @@ import argparse
 import os
 import sys
 
-from config import DATA_PATH, CHROMA_PATH, SYSTEM_PERSONA
+from config import DATA_PATH, CHROMA_PATH, SYSTEM_PERSONA, USE_CONTEXT_COMPRESSION
 from loaders.loader import load_project
 from indexing.chunking import chunk_documents
 from indexing.build_index import build_index, load_existing_index
@@ -55,8 +55,11 @@ def ask(index, llm, query: str) -> str:
     if not top_nodes:
         return "No relevant documents found. Try rephrasing your query."
 
-    print("\nCompressing context...")
-    compressed = compress_context(llm, query, top_nodes)
+    print("\nCompressing context..." if USE_CONTEXT_COMPRESSION else "\n📄 Using raw chunks...")
+    if USE_CONTEXT_COMPRESSION:
+        compressed = compress_context(llm, query, top_nodes)
+    else:
+        compressed = [node.text for node in top_nodes]
 
     context = "\n\n---\n\n".join(compressed)
 

@@ -38,9 +38,11 @@ LLM_TEMPERATURE = 0.0
 # ---------------------------------------------------------
 # RETRIEVAL SETTINGS
 # ---------------------------------------------------------
-TOP_K = 50         # Candidates from vector search
-FINAL_K = 5        # Final results after reranking
-MAX_AGENT_STEPS = 2  # Max agentic retrieval loops
+TOP_K = 20         # Candidates from vector search
+FINAL_K = 3        # Final results after reranking
+MAX_AGENT_STEPS = 1  # Max agentic retrieval loops
+USE_CONTEXT_COMPRESSION = False  # True = slower but cleaner context (recommended for 7B+ models)
+                                  # False = faster, raw chunks directly to LLM (fine for 4B models)
 
 # ---------------------------------------------------------
 # VECTOR DATABASE (ChromaDB, persistent on disk)
