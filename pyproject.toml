@@ -1,0 +1,28 @@
+[tool.poetry]
+package-mode = false
+name = "rag-pipeline"
+version = "1.0.0"
+description = "A modular RAG pipeline with agentic retrieval, reranking, and context compression. Works with any local Ollama LLM and any document collection."
+authors = ["ebenc"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+llama-index-core = ">=0.11.0"
+llama-index-llms-ollama = ">=0.3.0"
+llama-index-embeddings-huggingface = ">=0.3.0"
+llama-index-vector-stores-chroma = ">=0.2.0"
+chromadb = ">=0.5.0"
+greenlet = "<=3.1.1"
+onnxruntime = "<=1.19.2"
+sentence-transformers = ">=3.0.0"
+pandas = ">=2.0.0"
+pdfplumber = ">=0.11.0"
+beautifulsoup4 = ">=4.12.0"
+
+[tool.poetry.scripts]
+rag = "main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

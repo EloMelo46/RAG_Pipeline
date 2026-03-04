@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+.venv/
+
+# ChromaDB persistent storage
+chroma_db/
+
+# Data sources (download separately, see README)
+system-prompts-and-models-of-ai-tools-main/
+data/
+
+# HuggingFace model cache
+.cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Poetry lock (optional: remove this line if you want to commit poetry.lock)
+# poetry.lock

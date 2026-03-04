@@ -1,0 +1,78 @@
+"""
+RAG Pipeline Configuration
+
+Change these settings to adapt the pipeline to any project.
+"""
+
+import os
+
+# ---------------------------------------------------------
+# DATA SOURCE
+# ---------------------------------------------------------
+# Path to the folder containing your documents.
+# Change this to point at any repo, folder, or document collection.
+DATA_PATH = os.path.join(os.path.dirname(__file__), "system-prompts-and-models-of-ai-tools-main")
+
+# ---------------------------------------------------------
+# CHUNKING
+# ---------------------------------------------------------
+CHUNK_SIZE = 800       # Max tokens per chunk
+CHUNK_OVERLAP = 100    # Token overlap between chunks
+
+# ---------------------------------------------------------
+# EMBEDDING MODEL (downloaded automatically from HuggingFace)
+# ---------------------------------------------------------
+EMBED_MODEL = "BAAI/bge-large-en-v1.5"
+
+# ---------------------------------------------------------
+# RERANKER MODEL (downloaded automatically from HuggingFace)
+# ---------------------------------------------------------
+RERANK_MODEL = "BAAI/bge-reranker-large"
+
+# ---------------------------------------------------------
+# LLM (must be pulled in Ollama: `ollama pull gemma3:4b`)
+# ---------------------------------------------------------
+LLM_MODEL = "gemma3:4b"
+LLM_TEMPERATURE = 0.0
+
+# ---------------------------------------------------------
+# RETRIEVAL SETTINGS
+# ---------------------------------------------------------
+TOP_K = 50         # Candidates from vector search
+FINAL_K = 5        # Final results after reranking
+MAX_AGENT_STEPS = 2  # Max agentic retrieval loops
+
+# ---------------------------------------------------------
+# VECTOR DATABASE (ChromaDB, persistent on disk)
+# ---------------------------------------------------------
+CHROMA_PATH = os.path.join(os.path.dirname(__file__), "chroma_db")
+COLLECTION_NAME = "rag"
+
+# ---------------------------------------------------------
+# SYSTEM PERSONA
+# ---------------------------------------------------------
+# This controls HOW the LLM uses the retrieved context.
+# Change this to adapt the pipeline to different use cases.
+#
+# Examples:
+#   Prompt Engineering:
+#     "You are a world-class prompt engineer. ..."
+#   Code Assistant:
+#     "You are an expert software engineer. Use the retrieved code
+#      and documentation to answer the user's question accurately."
+#   Documentation Q&A:
+#     "You are a helpful documentation assistant. Answer the user's
+#      question based only on the provided context."
+#
+SYSTEM_PERSONA = """You are a world-class prompt engineer.
+
+Use the following retrieved context as reference material.
+Study the prompt patterns, tool definitions, and agent configurations carefully.
+Combine the best elements to create an optimal response.
+
+Rules:
+- Only use information from the context if it is relevant to the user's goal.
+- If the context is not relevant, ignore it and use your own knowledge.
+- Never hallucinate tools, capabilities, or prompt patterns not found in the context.
+- Always output a clean, well-structured, ready-to-use result.
+"""
