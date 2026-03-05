@@ -55,7 +55,7 @@ def ask(index, llm, query: str) -> str:
     if not top_nodes:
         return "No relevant documents found. Try rephrasing your query."
 
-    print("\nCompressing context..." if USE_CONTEXT_COMPRESSION else "\n📄 Using raw chunks...")
+    print("\nCompressing context..." if USE_CONTEXT_COMPRESSION else "\nUsing raw chunks...")
     if USE_CONTEXT_COMPRESSION:
         compressed = compress_context(llm, query, top_nodes)
     else:
