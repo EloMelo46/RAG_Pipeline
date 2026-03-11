@@ -46,6 +46,13 @@ USE_CONTEXT_COMPRESSION = False  # True = cleaner context, slower (recommended f
                                   # False = faster, raw chunks passed directly to LLM
 
 # ---------------------------------------------------------
+# SECURITY GUARDRAILS (requires: ollama pull llama-guard3:1b)
+# ---------------------------------------------------------
+ENABLE_INPUT_GUARDRAILS = True   # True = check user prompts for injection/toxicity
+ENABLE_OUTPUT_GUARDRAILS = True  # True = check LLM answers for safety violations 
+GUARDRAIL_MODEL = "llama-guard3:1b"
+
+# ---------------------------------------------------------
 # VECTOR DATABASE (ChromaDB, persistent on disk)
 # ---------------------------------------------------------
 CHROMA_PATH = os.path.join(os.path.dirname(__file__), "chroma_db")

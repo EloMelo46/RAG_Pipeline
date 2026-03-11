@@ -72,6 +72,9 @@ All settings are in **`config.py`**:
 | `MAX_AGENT_STEPS` | `1` | Max agentic retrieval loops |
 | `MULTI_QUERY_VARIANTS` | `3` | Search variants (1 = single query, no LLM call) |
 | `USE_CONTEXT_COMPRESSION` | `False` | Extract relevant parts per chunk (slower) |
+| `ENABLE_INPUT_GUARDRAILS` | `True` | Run Llama Guard on every user query before retrieval |
+| `ENABLE_OUTPUT_GUARDRAILS` | `True` | Run Llama Guard on every LLM response before returning it |
+| `GUARDRAIL_MODEL` | `llama-guard3:1b` | Ollama model used for safety checks |
 | `SYSTEM_PERSONA` | Prompt engineer | LLM persona / instructions |
 
 ## Performance Tuning
@@ -126,6 +129,35 @@ LLM_MODEL = "qwen2.5:7b"
 
 > **Note:** If you change `EMBED_MODEL`, delete `chroma_db/` and re-ingest. Vectors are model-specific.
 
+## Security Guardrails
+
+The pipeline uses [Llama Guard 3](https://ollama.com/library/llama-guard3) as a dedicated safety model to screen inputs and outputs.
+
+```bash
+# Pull the guard model (one-time, ~1.6 GB)
+ollama pull llama-guard3:1b
+```
+
+Two checks run on every query:
+
+1. **Input check** — before retrieval starts. Catches prompt injections, jailbreak attempts, and policy violations. Blocked queries never touch the vector database or the main LLM.
+2. **Output check** — after the main LLM generates its answer. Catches cases where the model produces an unsafe response despite a benign-looking query.
+
+Both checks return either `safe` or `unsafe <category>` (e.g. `S13` for prompt injection). If unsafe, a plain error message is returned instead of the original response.
+
+Disable either check in `config.py` when speed matters more than safety:
+
+```python
+ENABLE_INPUT_GUARDRAILS = False
+ENABLE_OUTPUT_GUARDRAILS = False
+```
+
+Swap the model at any time without touching the pipeline code:
+
+```python
+GUARDRAIL_MODEL = "llama-guard3:8b"  # higher accuracy, more VRAM
+```
+
 ### Changing the Persona
 
 Set `SYSTEM_PERSONA` in `config.py` to adapt the pipeline to any domain:
@@ -141,6 +173,7 @@ Set `SYSTEM_PERSONA` in `config.py` to adapt the pipeline to any domain:
 RAG_Pipeline/
 ├── main.py                      # Entry point
 ├── config.py                    # All settings
+├── test_security.py             # Security guardrails smoke test
 ├── pyproject.toml               # Poetry dependencies
 ├── loaders/loader.py            # Universal file loaders
 ├── indexing/
@@ -153,6 +186,9 @@ RAG_Pipeline/
 │   └── agentic_retriever.py     # Agentic retrieval loop
 ├── processing/
 │   └── context_compression.py   # Context compression
+├── security/
+│   ├── input_guardrails.py      # Llama Guard input check
+│   └── output_guardrails.py     # Llama Guard output check
 └── llm/ollama_client.py         # Ollama client
 ```
 

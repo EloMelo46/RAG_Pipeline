@@ -17,6 +17,8 @@ from indexing.build_index import build_index, load_existing_index
 from retrieval.agentic_retriever import agentic_retrieve
 from processing.context_compression import compress_context
 from llm.ollama_client import get_llm
+from security.input_guardrails import validate_input
+from security.output_guardrails import validate_output
 
 
 def ingest(data_path: str = None):
@@ -49,6 +51,12 @@ def ask(index, llm, query: str) -> str:
       2. Context compression
       3. LLM generates final answer
     """
+    
+    print("\nChecking input safety...")
+    is_safe, reason = validate_input(query)
+    if not is_safe:
+        return f"Request blocked by safety guardrails. Reason: {reason}"
+
     print("\nRunning agentic retrieval...")
     top_nodes = agentic_retrieve(index, llm, query)
 
@@ -72,8 +80,14 @@ def ask(index, llm, query: str) -> str:
 
     print("\nGenerating answer...")
     response = llm.complete(prompt)
+    answer = str(response)
+    
+    print("\nChecking output safety...")
+    is_safe_out, reason_out = validate_output(query, answer)
+    if not is_safe_out:
+        return f"The generated response was blocked by safety guardrails. Reason: {reason_out}"
 
-    return str(response)
+    return answer
 
 
 def main():
